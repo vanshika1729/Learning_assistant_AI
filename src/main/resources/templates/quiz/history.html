@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz History - Learning Assistant</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">Learning Assistant</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/materials">Learning Materials</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/quiz/list">Quizzes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/progress">My Progress</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                        <span sec:authentication="name">Username</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="/profile">Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <form th:action="@{/logout}" method="post">
+                            <button class="dropdown-item" type="submit">Logout</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Your Quiz History</h1>
+            <p class="lead">Track your progress across all quizzes</p>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Quiz Attempts</h5>
+                    <a href="/quiz/list" class="btn btn-light btn-sm">Take New Quiz</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Quiz</th>
+                                <th>Topic</th>
+                                <th>Date Completed</th>
+                                <th>Score</th>
+                                <th>Time Taken</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="attempt : ${attempts}">
+                                <td th:text="${attempt.quiz.title}">Quiz Title</td>
+                                <td th:text="${attempt.quiz.topic != null ? attempt.quiz.topic.name : 'General'}">Topic</td>
+                                <td th:text="${#temporals.format(attempt.completedAt, 'MMM dd, yyyy HH:mm')}">Apr 29, 2025 07:30</td>
+                                <td>
+                                        <span th:text="${attempt.score} + '%'"
+                                              th:class="${attempt.score >= 70 ? 'text-success' : (attempt.score >= 50 ? 'text-warning' : 'text-danger')}">
+                                            85%
+                                        </span>
+                                </td>
+                                <td th:text="${attempt.timeTaken} + ' min'">12 min</td>
+                                <td>
+                                    <a th:href="@{/quiz/result/{id}(id=${attempt.id})}" class="btn btn-outline-primary btn-sm">
+                                        View Results
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-info text-center" th:if="${#lists.isEmpty(attempts)}">
+                        You haven't completed any quizzes yet. <a href="/quiz/list">Take your first quiz now!</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Stats Summary -->
+            <div class="row" th:if="${!#lists.isEmpty(attempts)}">
+                <div class="col-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Quizzes Completed</h5>
+                            <h2 class="display-4" th:text="${#lists.size(attempts)}">12</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Average Score</h5>
+                            <h2 class="display-4" th:text="${averageScore != null ? #numbers.formatDecimal(averageScore, 1, 1) + '%' : 'N/A'}">78.5%</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Best Performance</h5>
+                            <h2 class="display-4" th:text="${bestScore != null ? bestScore + '%' : 'N/A'}">95%</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer mt-5 bg-light">
+    <div class="container py-3">
+        <p class="text-center">&copy; 2025 Learning Assistant</p>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+</body>
+</html>

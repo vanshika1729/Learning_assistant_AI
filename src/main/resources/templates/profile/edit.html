@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-10 offset-md-1">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3>Edit Profile</h3>
+          <a th:href="@{/profile}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/profile/update}" method="post">
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="firstName" class="form-label">First Name</label>
+                  <input type="text" class="form-control" id="firstName" name="firstName"
+                         th:value="${user.firstName}" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="lastName" class="form-label">Last Name</label>
+                  <input type="text" class="form-control" id="lastName" name="lastName"
+                         th:value="${user.lastName}" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="educationLevel" class="form-label">Education Level</label>
+              <select class="form-select" id="educationLevel" name="educationLevel" required>
+                <option value="" disabled>Select education level</option>
+                <option value="Elementary" th:selected="${profile.educationLevel == 'Elementary'}">Elementary</option>
+                <option value="Middle School" th:selected="${profile.educationLevel == 'Middle School'}">Middle School</option>
+                <option value="High School" th:selected="${profile.educationLevel == 'High School'}">High School</option>
+                <option value="Bachelors" th:selected="${profile.educationLevel == 'Bachelors'}">Bachelor's</option>
+                <option value="Masters" th:selected="${profile.educationLevel == 'Masters'}">Master's</option>
+                <option value="Doctorate" th:selected="${profile.educationLevel == 'Doctorate'}">Doctorate</option>
+                <option value="Other" th:selected="${profile.educationLevel == 'Other'}">Other</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="learningStyle" class="form-label">Learning Style</label>
+              <select class="form-select" id="learningStyle" name="learningStyle" required>
+                <option value="" disabled>Select learning style</option>
+                <option value="Visual" th:selected="${profile.preferredLearningStyle == 'Visual'}">Visual</option>
+                <option value="Auditory" th:selected="${profile.preferredLearningStyle == 'Auditory'}">Auditory</option>
+                <option value="Reading/Writing" th:selected="${profile.preferredLearningStyle == 'Reading/Writing'}">Reading/Writing</option>
+                <option value="Kinesthetic" th:selected="${profile.preferredLearningStyle == 'Kinesthetic'}">Kinesthetic</option>
+                <option value="Multimodal" th:selected="${profile.preferredLearningStyle == 'Multimodal'}">Multimodal</option>
+              </select>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+
+          <hr class="my-4">
+
+          <!-- Interests Section -->
+          <h4 class="mb-3">Manage Interests</h4>
+          <form th:action="@{/profile/interests/add}" method="post" class="mb-4">
+            <div class="input-group mb-3">
+              <select class="form-select" id="subjectId" name="subjectId" required>
+                <option value="" selected disabled>Select a subject</option>
+                <option th:each="subject : ${allSubjects}"
+                        th:value="${subject.id}"
+                        th:text="${subject.name}">Subject</option>
+              </select>
+              <button class="btn btn-outline-secondary" type="submit">Add Interest</button>
+            </div>
+          </form>
+
+          <!-- Skills Section -->
+          <h4 class="mb-3">Manage Skills</h4>
+          <form th:action="@{/profile/skills/update}" method="post" class="mb-3">
+            <div class="row g-3">
+              <div class="col-md-5">
+                <input type="text" class="form-control" id="subject" name="subject"
+                       placeholder="Skill name" required>
+              </div>
+              <div class="col-md-5">
+                <select class="form-select" id="level" name="level" required>
+                  <option value="" selected disabled>Select proficiency level</option>
+                  <option value="1">Beginner (1)</option>
+                  <option value="2">Elementary (2)</option>
+                  <option value="3">Intermediate (3)</option>
+                  <option value="4">Advanced (4)</option>
+                  <option value="5">Expert (5)</option>
+                  <option value="6">Level 6</option>
+                  <option value="7">Level 7</option>
+                  <option value="8">Level 8</option>
+                  <option value="9">Level 9</option>
+                  <option value="10">Master (10)</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-secondary w-100">Update</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

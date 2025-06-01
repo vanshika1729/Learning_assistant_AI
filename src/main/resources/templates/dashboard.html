@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Learning Assistant</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">Learning Assistant</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/materials">Learning Materials</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/quizzes">Quizzes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/progress">My Progress</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                        <span th:text="${user.username}">Username</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="/profile">Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <form th:action="@{/logout}" method="post">
+                            <button class="dropdown-item" type="submit">Logout</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="jumbotron">
+                <h1 class="display-4">Welcome to your Dashboard, <span th:text="${user.username}">Username</span>!</h1>
+                <p class="lead">Here's your personalized learning space</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Recommended Materials</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group" th:if="${!recommendations.empty}">
+                        <div th:each="rec : ${recommendations}">
+                            <a th:href="@{'/materials/' + ${rec.learningMaterial.id}}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1" th:text="${rec.learningMaterial.title}">Material Title</h6>
+                                </div>
+                                <p class="mb-1 text-muted" th:text="${rec.reason}">Recommendation reason</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="list-group" th:if="${recommendations.empty}">
+                        <div class="list-group-item">No recommendations yet. Complete some quizzes to get personalized content.</div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="/materials" class="btn btn-outline-primary btn-sm">View All Materials</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Recent Quiz Attempts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group" th:if="${!recentAttempts.empty}">
+                        <div th:each="attempt : ${recentAttempts}">
+                            <a th:href="@{'/quizzes/attempts/' + ${attempt.id}}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1" th:text="${attempt.quiz.title}">Quiz Title</h6>
+                                    <small th:text="${attempt.score} + '%'">Score</small>
+                                </div>
+                                <p class="mb-1 text-muted" th:text="${#temporals.format(attempt.completedAt, 'MMM dd, yyyy')}">Date</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="list-group" th:if="${recentAttempts.empty}">
+                        <div class="list-group-item">No quiz attempts yet. Take a quiz to start learning!</div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="/quizzes" class="btn btn-outline-success btn-sm">Take a Quiz</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Your Interests</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${!interests.empty}">
+                        <div class="mb-3">
+                            <div th:each="interest : ${interests}" class="badge badge-info mr-2 mb-2 p-2">
+                                <span th:text="${interest.subject.name}">Interest</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${interests.empty}">
+                        <p>You haven't set any interests yet. Update your profile to get better recommendations.</p>
+                    </div>
+                    <div class="mt-3">
+                        <a href="/profile" class="btn btn-outline-info btn-sm">Update Interests</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Available Subjects</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div th:each="subject : ${subjects}" class="col-md-4 mb-3">
+                            <a th:href="@{'/subjects/' + ${subject.id}}" class="btn btn-outline-primary btn-block">
+                                <span th:text="${subject.name}">Subject</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">Quick Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="/profile" class="list-group-item list-group-item-action">
+                            <i class="fa fa-user mr-2"></i> My Profile
+                        </a>
+                        <a href="/quizzes" class="list-group-item list-group-item-action">
+                            <i class="fa fa-question-circle mr-2"></i> Available Quizzes
+                        </a>
+                        <a href="/progress" class="list-group-item list-group-item-action">
+                            <i class="fa fa-chart-line mr-2"></i> Learning Progress
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer mt-5 bg-light">
+    <div class="container py-3">
+        <p class="text-center">&copy; 2025 Learning Assistant</p>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Student Profile</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Student Profile</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Personal Information</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> <span th:text="${user.firstName + ' ' + user.lastName}">John Doe</span></p>
+                    <p><strong>Username:</strong> <span th:text="${user.username}">johndoe</span></p>
+                    <p><strong>Education Level:</strong> <span th:text="${profile.educationLevel}">High School</span></p>
+                    <p><strong>Preferred Learning Style:</strong> <span th:text="${profile.preferredLearningStyle}">Visual</span></p>
+                </div>
+            </div>
+            <a th:href="@{/profile/edit}" class="btn btn-primary">Edit Profile</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Interests</h2>
+        </div>
+        <div class="card-body">
+            <div th:if="${interests.isEmpty()}" class="alert alert-info">
+                You haven't added any interests yet.
+            </div>
+            <div th:unless="${interests.isEmpty()}" class="row">
+                <div class="col-md-12">
+                    <ul class="list-group">
+                        <li th:each="subject : ${interests}" class="list-group-item d-flex justify-content-between align-items-center">
+                            <span th:text="${subject.name}">Math</span>
+                            <a th:href="@{/profile/interests/remove/{id}(id=${subject.id})}" class="btn btn-sm btn-danger">Remove</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <form th:action="@{/profile/interests/add}" method="post" class="row g-3">
+                    <div class="col-auto">
+                        <select name="subjectId" class="form-select" required>
+                            <option value="">Select a subject</option>
+                            <option th:each="subject : ${allSubjects}"
+                                    th:if="${!interests.contains(subject)}"
+                                    th:value="${subject.id}"
+                                    th:text="${subject.name}">Subject</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-success">Add Interest</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Skills</h2>
+        </div>
+        <div class="card-body">
+            <div th:if="${skills.isEmpty()}" class="alert alert-info">
+                You haven't added any skills yet.
+            </div>
+            <div th:unless="${skills.isEmpty()}">
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Proficiency Level (1-10)</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="skill : ${skills}">
+                                <td th:text="${skill.key}">Math</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar"
+                                             th:style="'width: ' + ${skill.value * 10} + '%'"
+                                             th:text="${skill.value} + '/10'">
+                                            5/10
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <form th:action="@{/profile/skills/update}" method="post" class="d-flex">
+                                        <input type="hidden" name="subject" th:value="${skill.key}">
+                                        <select name="level" class="form-select form-select-sm me-2" style="width: 70px;">
+                                            <option th:each="i : ${#numbers.sequence(1, 10)}"
+                                                    th:value="${i}"
+                                                    th:text="${i}"
+                                                    th:selected="${i == skill.value}">5</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <form th:action="@{/profile/skills/update}" method="post" class="row g-3">
+                    <div class="col-auto">
+                        <input type="text" name="subject" class="form-control" placeholder="Subject name" required>
+                    </div>
+                    <div class="col-auto">
+                        <select name="level" class="form-select" required>
+                            <option value="">Select level</option>
+                            <option th:each="i : ${#numbers.sequence(1, 10)}" th:value="${i}" th:text="${i}">1</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-success">Add/Update Skill</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

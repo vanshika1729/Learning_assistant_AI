@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${quiz.title} + ' - Learning Assistant'">Quiz Details - Learning Assistant</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">Learning Assistant</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/materials">Learning Materials</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/quiz/list">Quizzes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/progress">My Progress</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                        <span sec:authentication="name">Username</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="/profile">Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <form th:action="@{/logout}" method="post">
+                            <button class="dropdown-item" type="submit">Logout</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0" th:text="${quiz.title}">Quiz Title</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p th:text="${quiz.description}">Quiz description goes here...</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Quiz Details</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Subject:</strong> <span th:text="${quiz.topic != null ? quiz.topic.name : 'General'}">Subject</span></li>
+                                        <li><strong>Number of Questions:</strong> <span th:text="${#lists.size(quiz.questions)}">10</span></li>
+                                        <li th:if="${quiz.timeLimit > 0}"><strong>Time Limit:</strong> <span th:text="${quiz.timeLimit}">30</span> minutes</li>
+                                        <li th:if="${quiz.difficultyLevel != null}"><strong>Difficulty Level:</strong> <span th:text="${quiz.difficultyLevel}">Intermediate</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Instructions</h6>
+                                    <ul>
+                                        <li>Read each question carefully before answering</li>
+                                        <li>You can't go back to previous questions</li>
+                                        <li th:if="${quiz.timeLimit > 0}">The quiz will auto-submit when time expires</li>
+                                        <li>Your results will be available immediately after completion</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <a th:href="@{/quiz/{id}/start(id=${quiz.id})}" class="btn btn-primary btn-lg">Start Quiz</a>
+                        <a href="/quiz/list" class="btn btn-outline-secondary">Back to Quiz List</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer mt-5 bg-light">
+    <div class="container py-3">
+        <p class="text-center">&copy; 2025 Learning Assistant</p>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${quiz.title} + ' - Learning Assistant'">Quiz - Learning Assistant</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .question-timer {
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .question-container {
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">Learning Assistant</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/materials">Learning Materials</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/quiz/list">Quizzes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/progress">My Progress</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                        <span sec:authentication="name">Username</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="/profile">Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <form th:action="@{/logout}" method="post">
+                            <button class="dropdown-item" type="submit">Logout</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 th:text="${quiz.title}">Quiz Title</h1>
+            <p class="lead" th:text="${quiz.description}">Quiz description.</p>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Quiz in Progress</h5>
+                    <div id="quiz-timer" class="badge badge-light" th:if="${quiz.timeLimit > 0}">
+                        Time remaining: <span id="minutes">00</span>:<span id="seconds">00</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/quiz/submit/{attemptId}(attemptId=${attempt.id})}" method="post" id="quiz-form">
+                        <div th:each="question, qStat : ${quiz.questions}" class="question-container">
+                            <h5 th:text="${qStat.count} + '. ' + ${question.text}">Question text</h5>
+
+                            <!-- Timer for each question (optional) -->
+                            <div class="question-timer mb-3" th:if="${question.timeLimit > 0}">
+                                Time for this question: <span th:id="'timer-' + ${question.id}" th:data-limit="${question.timeLimit}">0</span>s
+                                <input type="hidden" th:name="'timeSpent_' + ${question.id}" th:id="'timeSpent_' + ${question.id}" value="0">
+                            </div>
+
+                            <!-- Multiple choice question -->
+                            <div th:if="${question.type == 'MULTIPLE_CHOICE'}" class="form-group">
+                                <div class="custom-control custom-radio" th:each="answer : ${question.answers}">
+                                    <input type="radio" th:id="'answer_' + ${answer.id}"
+                                           th:name="'question_' + ${question.id}"
+                                           th:value="${answer.id}"
+                                           class="custom-control-input" required>
+                                    <label class="custom-control-label"
+                                           th:for="'answer_' + ${answer.id}"
+                                           th:text="${answer.text}">Answer text</label>
+                                </div>
+                            </div>
+
+                            <!-- Text answer question -->
+                            <div th:if="${question.type == 'TEXT'}" class="form-group">
+                                <textarea class="form-control"
+                                          th:name="'text_answer_' + ${question.id}"
+                                          placeholder="Type your answer here..."
+                                          rows="3" required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Quiz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer mt-5 bg-light">
+    <div class="container py-3">
+        <p class="text-center">&copy; 2025 Learning Assistant</p>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Initialize quiz timer
+    function startQuizTimer(totalSeconds) {
+        if (totalSeconds <= 0) return;
+
+        const minutesElement = document.getElementById('minutes');
+        const secondsElement = document.getElementById('seconds');
+        const quizForm = document.getElementById('quiz-form');
+
+        let timeLeft = totalSeconds;
+
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+
+            minutesElement.textContent = minutes.toString().padStart(2, '0');
+            secondsElement.textContent = seconds.toString().padStart(2, '0');
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                quizForm.submit();
+            }
+        }, 1000);
+    }
+
+    // Initialize question timers
+    function startQuestionTimers() {
+        const questionTimers = document.querySelectorAll('[id^="timer-"]');
+        questionTimers.forEach(timer => {
+            const questionId = timer.id.split('-')[1];
+            const timeLimit = parseInt(timer.getAttribute('data-limit'));
+            const timeSpentField = document.getElementById('timeSpent_' + questionId);
+
+            let timeSpent = 0;
+            const timerInterval = setInterval(() => {
+                timeSpent++;
+                timer.textContent = timeSpent;
+                timeSpentField.value = timeSpent;
+            }, 1000);
+        });
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        // Start quiz timer if time limit exists
+        const quizTimeLimit = [[${quiz.timeLimit}]];
+        if (quizTimeLimit > 0) {
+            startQuizTimer(quizTimeLimit * 60);
+        }
+
+        // Start individual question timers
+        startQuestionTimers();
+    });
+</script>
+</body>
+</html>
